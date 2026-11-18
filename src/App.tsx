@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { SimulationEngine } from './engine/SimulationEngine';
 import { Header } from './components/Header';
 import { CanvasSimulation } from './components/CanvasSimulation';
@@ -9,13 +9,19 @@ import { VivaExplainerModal } from './components/VivaExplainerModal';
 import { Approach, ControlMode, IntersectionState, SimulationMetrics, WeatherType } from './types/traffic';
 
 export function App() {
-  const engine = useMemo(() => new SimulationEngine(), []);
-
-  const [controlMode, setControlMode] = useState<ControlMode>('ADAPTIVE');
+  const [controlMode, setControlMode] = useState<ControlMode>('WEBSTER');
+  const [tunedFixedGreen, setTunedFixedGreen] = useState<number>(15);
   const [currentWeather, setCurrentWeather] = useState<WeatherType>('CLEAR');
   const [trafficDensity, setTrafficDensity] = useState<number>(1.0);
   const [simSpeed, setSimSpeed] = useState<number>(1.0);
   const [isVivaModalOpen, setIsVivaModalOpen] = useState<boolean>(false);
+
+  // Twin Simulation Engines for Real A/B Benchmarking (Identical seed 42)
+  const engine = useMemo(() => new SimulationEngine({ seed: 42, controlMode: 'WEBSTER' }), []);
+  const fixedEngine = useMemo(
+    () => new SimulationEngine({ seed: 42, controlMode: 'FIXED', tunedFixedGreen: 15 }),
+    []
+  );
 
   // Synchronized state with engine for React re-renders
   const [intersections, setIntersections] = useState<IntersectionState[]>([]);
@@ -31,7 +37,7 @@ export function App() {
       setIntersections(Array.from(engine.intersections.values()));
       setMetrics([...engine.metricsHistory]);
       setActiveVehiclesCount(engine.vehicles.length);
-      setTotalThroughput(engine.metricsHistory[engine.metricsHistory.length - 1]?.totalThroughput || 0);
+      setTotalThroughput(engine.completedTrips.length);
       setIsEmergencyActive(engine.emergencyManager.isEmergencyActive());
       setHasAccidents(engine.accidentManager.getAllAccidents().length > 0);
     }, 100);
@@ -44,38 +50,53 @@ export function App() {
     engine.setControlMode(mode);
   };
 
+  const handleSetTunedFixedGreen = (val: number) => {
+    setTunedFixedGreen(val);
+    fixedEngine.tunedFixedGreen = val;
+    if (controlMode === 'FIXED') {
+      engine.tunedFixedGreen = val;
+    }
+  };
+
   const handleSetWeather = (weather: WeatherType) => {
     setCurrentWeather(weather);
     engine.setWeather(weather);
+    fixedEngine.setWeather(weather);
   };
 
   const handleSetTrafficDensity = (density: number) => {
     setTrafficDensity(density);
     engine.trafficDensityFactor = density;
+    fixedEngine.trafficDensityFactor = density;
   };
 
   const handleSetSimSpeed = (spd: number) => {
     setSimSpeed(spd);
     engine.simulationSpeed = spd;
+    fixedEngine.simulationSpeed = spd;
   };
 
   const handleSpawnEmergency = (routeId: string) => {
     engine.spawnEmergencyVehicle(routeId);
+    fixedEngine.spawnEmergencyVehicle(routeId);
     setIsEmergencyActive(true);
   };
 
   const handleTriggerAccident = (intersectionId: string, approach: Approach) => {
     engine.triggerAccident(intersectionId, approach);
+    fixedEngine.triggerAccident(intersectionId, approach);
     setHasAccidents(true);
   };
 
   const handleClearAccidents = () => {
     engine.clearAllAccidents();
+    fixedEngine.clearAllAccidents();
     setHasAccidents(false);
   };
 
   const handleReset = () => {
-    engine.resetSimulation();
+    engine.resetSimulation(42);
+    fixedEngine.resetSimulation(42);
     setIntersections(Array.from(engine.intersections.values()));
     setMetrics([]);
     setActiveVehiclesCount(0);
@@ -104,7 +125,7 @@ export function App() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Simulation Visualizer (7 cols) */}
           <div className="lg:col-span-7 flex flex-col gap-4">
-            <CanvasSimulation engine={engine} />
+            <CanvasSimulation engine={engine} fixedEngine={fixedEngine} />
           </div>
 
           {/* Interactive Controls & Scenario Injectors (5 cols) */}
@@ -120,6 +141,10 @@ export function App() {
               simSpeed={simSpeed}
               onSetSimSpeed={handleSetSimSpeed}
               hasAccidents={hasAccidents}
+              controlMode={controlMode}
+              onSetControlMode={handleToggleMode}
+              tunedFixedGreen={tunedFixedGreen}
+              onSetTunedFixedGreen={handleSetTunedFixedGreen}
             />
           </div>
         </div>
@@ -130,14 +155,20 @@ export function App() {
             <h2 className="text-sm font-semibold text-slate-300">
               Live Intersection Controllers (2×2 Network)
             </h2>
-            <span className="text-xs text-slate-500">Auto-synchronized via inter-agent communication</span>
+            <span className="text-xs text-slate-500">
+              Active Control: <strong className="text-emerald-400 font-mono">{controlMode}</strong> | Pure Decision Logic
+            </span>
           </div>
           <IntersectionGridCards intersections={intersections} />
         </section>
 
         {/* Performance Analytics & Proof-of-Improvement Chart */}
         <section>
-          <AnalyticsDashboard metrics={metrics} mode={controlMode} />
+          <AnalyticsDashboard
+            metrics={metrics}
+            mode={controlMode}
+            tunedBaselineDuration={tunedFixedGreen}
+          />
         </section>
       </main>
 

@@ -265,9 +265,31 @@
       "attrs": {
         "value": "220"
       }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "emBtn",
+      "top": 240,
+      "left": 550,
+      "attrs": {
+        "color": "red",
+        "label": "EMERGENCY INT4"
+      }
     }
   ],
   "connections": [
+    [
+      "emBtn:1.l",
+      "mega:2",
+      "red",
+      []
+    ],
+    [
+      "emBtn:2.l",
+      "mega:GND.2",
+      "black",
+      []
+    ],
     [
       "lcd:GND",
       "mega:GND.1",

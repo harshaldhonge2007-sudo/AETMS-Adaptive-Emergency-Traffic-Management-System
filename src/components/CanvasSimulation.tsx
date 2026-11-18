@@ -17,9 +17,10 @@ import {
 
 interface Props {
   engine: SimulationEngine;
+  fixedEngine?: SimulationEngine;
 }
 
-export const CanvasSimulation: React.FC<Props> = ({ engine }) => {
+export const CanvasSimulation: React.FC<Props> = ({ engine, fixedEngine }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   // Interactive Visualizer Toggles
@@ -136,6 +137,15 @@ export const CanvasSimulation: React.FC<Props> = ({ engine }) => {
 
       // Update simulation logic
       engine.update(dt);
+      if (fixedEngine) {
+        fixedEngine.isPaused = engine.isPaused;
+        fixedEngine.simulationSpeed = engine.simulationSpeed;
+        fixedEngine.update(dt);
+        const baselineLatest = fixedEngine.metricsHistory[fixedEngine.metricsHistory.length - 1];
+        if (baselineLatest) {
+          engine.externalFixedBaselineDelay = baselineLatest.avgWaitTime;
+        }
+      }
 
       const canvas = canvasRef.current;
       if (canvas) {
@@ -227,6 +237,7 @@ export const CanvasSimulation: React.FC<Props> = ({ engine }) => {
     const weather = sim.weatherManager.getWeather();
     const isEmergency = sim.emergencyManager.isEmergencyActive();
     const emergencyRoute = sim.emergencyManager.getActiveRoute();
+    const simTimeMs = sim.simTime * 1000;
 
     // 1. Clear background (Urban Dark Asphalt)
     ctx.fillStyle = '#070b12';
@@ -237,7 +248,7 @@ export const CanvasSimulation: React.FC<Props> = ({ engine }) => {
 
     // 3. Emergency Green Wave Priority Corridor Glow (if active)
     if (isEmergency && emergencyRoute) {
-      drawEmergencyCorridorGlow(ctx, emergencyRoute, ROAD_WIDTH, CANVAS_WIDTH, CANVAS_HEIGHT);
+      drawEmergencyCorridorGlow(ctx, emergencyRoute, ROAD_WIDTH, CANVAS_WIDTH, CANVAS_HEIGHT, simTimeMs);
     }
 
     // 4. Roads, Asphalt, Curbs, Crosswalks & Markings
@@ -336,10 +347,11 @@ export const CanvasSimulation: React.FC<Props> = ({ engine }) => {
     route: any,
     roadWidth: number,
     cw: number,
-    ch: number
+    ch: number,
+    simTimeMs: number
   ) => {
     ctx.save();
-    const pulse = (Math.sin(Date.now() * 0.006) + 1) * 0.5; // 0 to 1
+    const pulse = (Math.sin(simTimeMs * 0.006) + 1) * 0.5; // 0 to 1
     ctx.strokeStyle = `rgba(239, 68, 68, ${0.25 + pulse * 0.25})`;
     ctx.lineWidth = roadWidth + 24;
     ctx.lineCap = 'round';
@@ -730,7 +742,7 @@ export const CanvasSimulation: React.FC<Props> = ({ engine }) => {
   // HC-SR04 ULTRASONIC SENSORS VISUALIZATION
   // -------------------------------------------------------------
   const drawUltrasonicSensors = (ctx: CanvasRenderingContext2D, sim: SimulationEngine) => {
-    const time = Date.now() * 0.003;
+    const time = sim.simTime * 3.0;
 
     for (const inter of sim.intersections.values()) {
       const { x, y, queues } = inter;
@@ -828,7 +840,7 @@ export const CanvasSimulation: React.FC<Props> = ({ engine }) => {
           const fromInter = sim.intersections.get(p.fromIntersectionId);
           if (fromInter) {
             ctx.save();
-            const dashOffset = (Date.now() * 0.03) % 20;
+            const dashOffset = (sim.simTime * 30) % 20;
             ctx.strokeStyle = 'rgba(52, 211, 153, 0.6)';
             ctx.lineWidth = 3;
             ctx.lineCap = 'round';
@@ -893,7 +905,7 @@ export const CanvasSimulation: React.FC<Props> = ({ engine }) => {
       }
 
       ctx.save();
-      const pulse = (Date.now() % 1000) / 1000;
+      const pulse = ((sim.simTime * 1000) % 1000) / 1000;
       ctx.strokeStyle = `rgba(239, 68, 68, ${0.85 - pulse * 0.8})`;
       ctx.lineWidth = 2.5;
       ctx.beginPath();
@@ -987,7 +999,7 @@ export const CanvasSimulation: React.FC<Props> = ({ engine }) => {
 
     // 2. Emergency Siren Shockwave
     if (v.isEmergency) {
-      const wavePhase = (Date.now() % 500) / 500;
+      const wavePhase = ((sim.simTime * 1000) % 500) / 500;
       ctx.save();
       ctx.strokeStyle = `rgba(239, 68, 68, ${0.7 - wavePhase * 0.6})`;
       ctx.lineWidth = 1.8;
@@ -1053,7 +1065,7 @@ export const CanvasSimulation: React.FC<Props> = ({ engine }) => {
 
     // 7. Hazard Blinkers (when yielding or stopped behind accident)
     if (v.isYielding || v.isAccidentStopped) {
-      const isAmberBlink = Math.floor(Date.now() / 250) % 2 === 0;
+      const isAmberBlink = Math.floor((sim.simTime * 1000) / 250) % 2 === 0;
       if (isAmberBlink) {
         ctx.fillStyle = '#f59e0b';
         ctx.shadowColor = '#f59e0b';
@@ -1068,7 +1080,7 @@ export const CanvasSimulation: React.FC<Props> = ({ engine }) => {
 
     // 8. Emergency Rotating Strobe Beacons
     if (v.isEmergency) {
-      const strobeTime = Math.floor(Date.now() / 110) % 2;
+      const strobeTime = Math.floor((sim.simTime * 1000) / 110) % 2;
       const strobeColor = strobeTime === 0 ? '#ef4444' : '#3b82f6';
 
       ctx.fillStyle = strobeColor;
@@ -1111,7 +1123,7 @@ export const CanvasSimulation: React.FC<Props> = ({ engine }) => {
       ctx.strokeStyle = weather.type === 'STORM' ? '#93c5fd' : '#60a5fa';
       ctx.lineWidth = 1;
       const count = weather.type === 'STORM' ? 90 : 45;
-      const time = Date.now() * 0.001;
+      const time = sim.simTime;
 
       ctx.beginPath();
       for (let i = 0; i < count; i++) {

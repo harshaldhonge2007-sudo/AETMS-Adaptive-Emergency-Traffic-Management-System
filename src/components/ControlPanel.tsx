@@ -6,6 +6,7 @@ import {
   CloudFog,
   CloudLightning,
   CloudRain,
+  Cpu,
   Flame,
   Plus,
   Radio,
@@ -17,7 +18,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { PRESET_EMERGENCY_ROUTES } from '../engine/EmergencyManager';
-import { Approach, WeatherType } from '../types/traffic';
+import { Approach, ControlMode, WeatherType } from '../types/traffic';
 
 interface Props {
   onSpawnEmergency: (routeId: string) => void;
@@ -30,6 +31,10 @@ interface Props {
   simSpeed: number;
   onSetSimSpeed: (val: number) => void;
   hasAccidents: boolean;
+  controlMode: ControlMode;
+  onSetControlMode: (mode: ControlMode) => void;
+  tunedFixedGreen: number;
+  onSetTunedFixedGreen: (val: number) => void;
 }
 
 export const ControlPanel: React.FC<Props> = ({
@@ -43,6 +48,10 @@ export const ControlPanel: React.FC<Props> = ({
   simSpeed,
   onSetSimSpeed,
   hasAccidents,
+  controlMode,
+  onSetControlMode,
+  tunedFixedGreen,
+  onSetTunedFixedGreen,
 }) => {
   const [selectedRoute, setSelectedRoute] = useState<string>(PRESET_EMERGENCY_ROUTES[0].id);
   const [selectedAccidentInter, setSelectedAccidentInter] = useState<string>('I1');
@@ -58,6 +67,41 @@ export const ControlPanel: React.FC<Props> = ({
         <span className="text-xs text-slate-400 font-mono">Live Injections</span>
       </div>
 
+      {/* Control Algorithm Selector */}
+      <div className="bg-slate-950/70 border border-slate-800/80 rounded-xl p-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Cpu className="w-4 h-4 text-emerald-400" />
+          <div>
+            <span className="text-xs font-semibold text-white block">Active Controller Algorithm:</span>
+            <span className="text-[10px] text-slate-400">Pure decision logic with exact mathematical formulations</span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1.5 w-full sm:w-auto">
+          {[
+            { mode: 'WEBSTER' as ControlMode, label: 'True Webster', desc: 'C0=(1.5L+5)/(1-Y)' },
+            { mode: 'QUEUE_PRESSURE' as ControlMode, label: 'Queue Pressure', desc: 'Q^1.25 Heuristic' },
+            { mode: 'FIXED' as ControlMode, label: 'Fixed Cycle', desc: `${tunedFixedGreen}s Base` },
+          ].map((m) => {
+            const isActive =
+              controlMode === m.mode || (m.mode === 'WEBSTER' && controlMode === 'ADAPTIVE');
+            return (
+              <button
+                key={m.mode}
+                onClick={() => onSetControlMode(m.mode)}
+                className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                  isActive
+                    ? 'bg-emerald-600 text-white border-emerald-500 shadow-md shadow-emerald-950/40'
+                    : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200'
+                }`}
+              >
+                {m.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* 1. Emergency Vehicle Priority Dispatcher */}
         <div className="bg-slate-950/70 border border-slate-800/80 rounded-xl p-3.5 flex flex-col justify-between gap-3">
@@ -67,7 +111,7 @@ export const ControlPanel: React.FC<Props> = ({
               Emergency Preemption
             </div>
             <p className="text-xs text-slate-400 mb-3">
-              Spawn priority ambulance/fire engine with green wave corridor.
+              Detects approaching ambulance (&lt;160px) & triggers safe yellow/all-red sequence.
             </p>
             <select
               value={selectedRoute}
@@ -87,7 +131,7 @@ export const ControlPanel: React.FC<Props> = ({
             className="w-full py-2 px-3 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-rose-900/30 active:scale-[0.98]"
           >
             <Zap className="w-3.5 h-3.5" />
-            Dispatch Emergency Vehicle
+            Dispatch Ambulance
           </button>
         </div>
 
@@ -99,7 +143,7 @@ export const ControlPanel: React.FC<Props> = ({
               Accident & Bottleneck
             </div>
             <p className="text-xs text-slate-400 mb-3">
-              Simulate crash, collapse lane capacity & force green re-allocation.
+              Simulates collision: collapses lane capacity & diverts green time to cross traffic.
             </p>
             <div className="grid grid-cols-2 gap-2 mb-2">
               <select
@@ -153,7 +197,7 @@ export const ControlPanel: React.FC<Props> = ({
               Environmental Weather
             </div>
             <p className="text-xs text-slate-400 mb-3">
-              Modifies braking friction, speed & yellow clearance safety buffer.
+              Modifies braking friction, speed & yellow clearance safety buffer (+1.5s).
             </p>
           </div>
 
@@ -185,21 +229,18 @@ export const ControlPanel: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* 4. Traffic Flow & Sim Speed Controls */}
+        {/* 4. Traffic Flow & Fixed Baseline Tuner */}
         <div className="bg-slate-950/70 border border-slate-800/80 rounded-xl p-3.5 flex flex-col justify-between gap-3">
           <div>
             <div className="flex items-center gap-2 text-sm font-semibold text-emerald-300 mb-1">
               <Car className="w-4 h-4 text-emerald-400" />
               Traffic Density & Pace
             </div>
-            <p className="text-xs text-slate-400 mb-3">
-              Adjust Poisson arrival frequency and simulation execution speed.
-            </p>
 
             {/* Density Slider */}
-            <div className="space-y-1.5 mb-2">
+            <div className="space-y-1 mb-2">
               <div className="flex justify-between text-xs">
-                <span className="text-slate-400">Spawn Density:</span>
+                <span className="text-slate-400">Poisson Density:</span>
                 <span className="text-emerald-400 font-mono font-bold">
                   {(trafficDensity * 100).toFixed(0)}%
                 </span>
@@ -215,9 +256,29 @@ export const ControlPanel: React.FC<Props> = ({
               />
             </div>
 
+            {/* Fixed Baseline Tuner */}
+            <div className="flex items-center justify-between text-xs pt-1 mb-2">
+              <span className="text-slate-400">Fixed Baseline Split:</span>
+              <div className="flex gap-1">
+                {[15, 20, 25, 30].map((sec) => (
+                  <button
+                    key={sec}
+                    onClick={() => onSetTunedFixedGreen(sec)}
+                    className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold border transition-all ${
+                      tunedFixedGreen === sec
+                        ? 'bg-sky-600 text-white border-sky-400'
+                        : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200'
+                    }`}
+                  >
+                    {sec}s
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Speed Selector */}
             <div className="flex items-center justify-between text-xs pt-1">
-              <span className="text-slate-400">Simulation Speed:</span>
+              <span className="text-slate-400">Sim Pace:</span>
               <div className="flex gap-1">
                 {[1.0, 1.5, 2.0].map((spd) => (
                   <button

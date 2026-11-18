@@ -3,15 +3,12 @@ import {
   Activity,
   AlertTriangle,
   BookOpen,
-  CloudRain,
   Cpu,
-  Flame,
   Gauge,
-  HelpCircle,
-  Radio,
   RefreshCw,
   Siren,
   Sparkles,
+  Zap,
 } from 'lucide-react';
 import { ControlMode } from '../types/traffic';
 
@@ -81,40 +78,55 @@ export const Header: React.FC<Props> = ({
           <div className="hidden sm:flex items-center gap-3 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/60 text-slate-300">
             <div className="flex items-center gap-1.5">
               <Activity className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Vehicles: <strong className="text-white font-mono">{activeVehiclesCount}</strong></span>
+              <span>
+                Vehicles: <strong className="text-white font-mono">{activeVehiclesCount}</strong>
+              </span>
             </div>
             <span className="text-slate-600">|</span>
             <div>
-              <span>Cleared: <strong className="text-white font-mono">{totalThroughput}</strong></span>
+              <span>
+                Completed Trips: <strong className="text-white font-mono">{totalThroughput}</strong>
+              </span>
             </div>
           </div>
         </div>
 
         {/* Action Controls & Mode Switch */}
         <div className="flex items-center gap-2">
-          {/* Mode Switch Button */}
+          {/* 3-Way Mode Switch Button */}
           <div className="flex items-center p-0.5 rounded-xl bg-slate-950 border border-slate-800">
             <button
-              onClick={() => onToggleMode('ADAPTIVE')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
-                mode === 'ADAPTIVE'
+              onClick={() => onToggleMode('WEBSTER')}
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
+                mode === 'WEBSTER' || mode === 'ADAPTIVE'
                   ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5" />
-              Adaptive Webster
+              <Sparkles className="w-3 h-3" />
+              <span>Webster</span>
+            </button>
+            <button
+              onClick={() => onToggleMode('QUEUE_PRESSURE')}
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
+                mode === 'QUEUE_PRESSURE'
+                  ? 'bg-sky-600 text-white shadow-md shadow-sky-600/30'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Zap className="w-3 h-3" />
+              <span>Pressure</span>
             </button>
             <button
               onClick={() => onToggleMode('FIXED')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
                 mode === 'FIXED'
                   ? 'bg-amber-600 text-white shadow-md shadow-amber-600/30'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              <Gauge className="w-3.5 h-3.5" />
-              Fixed-Cycle
+              <Gauge className="w-3 h-3" />
+              <span>Fixed</span>
             </button>
           </div>
 
