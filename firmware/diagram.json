@@ -1,0 +1,613 @@
+{
+  "version": 1,
+  "author": "Adaptive Traffic Signal Project",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "wokwi-arduino-mega",
+      "id": "mega",
+      "top": 20,
+      "left": 300,
+      "attrs": {
+        "env": "arduino-mega"
+      }
+    },
+    {
+      "type": "wokwi-lcd1602",
+      "id": "lcd",
+      "top": -5,
+      "left": 15,
+      "attrs": {
+        "pins": "i2c",
+        "i2cAddress": "0x27"
+      }
+    },
+    {
+      "type": "wokwi-hc-sr04",
+      "id": "usN",
+      "top": 160,
+      "left": 15,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-hc-sr04",
+      "id": "usS",
+      "top": 160,
+      "left": 170,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-hc-sr04",
+      "id": "usE",
+      "top": 160,
+      "left": 325,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-hc-sr04",
+      "id": "usW",
+      "top": 160,
+      "left": 480,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-led",
+      "id": "nred",
+      "top": 300,
+      "left": 15,
+      "attrs": {
+        "color": "red"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "nredres",
+      "top": 340,
+      "left": 20,
+      "attrs": {
+        "value": "220"
+      }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "nyellow",
+      "top": 300,
+      "left": 75,
+      "attrs": {
+        "color": "yellow"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "nyellowres",
+      "top": 340,
+      "left": 80,
+      "attrs": {
+        "value": "220"
+      }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "ngreen",
+      "top": 300,
+      "left": 135,
+      "attrs": {
+        "color": "green"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "ngreenres",
+      "top": 340,
+      "left": 140,
+      "attrs": {
+        "value": "220"
+      }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "sred",
+      "top": 440,
+      "left": 15,
+      "attrs": {
+        "color": "red"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "sredres",
+      "top": 480,
+      "left": 20,
+      "attrs": {
+        "value": "220"
+      }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "syellow",
+      "top": 440,
+      "left": 75,
+      "attrs": {
+        "color": "yellow"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "syellowres",
+      "top": 480,
+      "left": 80,
+      "attrs": {
+        "value": "220"
+      }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "sgreen",
+      "top": 440,
+      "left": 135,
+      "attrs": {
+        "color": "green"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "sgreenres",
+      "top": 480,
+      "left": 140,
+      "attrs": {
+        "value": "220"
+      }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "ered",
+      "top": 300,
+      "left": 300,
+      "attrs": {
+        "color": "red"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "eredres",
+      "top": 340,
+      "left": 305,
+      "attrs": {
+        "value": "220"
+      }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "eyellow",
+      "top": 300,
+      "left": 360,
+      "attrs": {
+        "color": "yellow"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "eyellowres",
+      "top": 340,
+      "left": 365,
+      "attrs": {
+        "value": "220"
+      }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "egreen",
+      "top": 300,
+      "left": 420,
+      "attrs": {
+        "color": "green"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "egreenres",
+      "top": 340,
+      "left": 425,
+      "attrs": {
+        "value": "220"
+      }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "wred",
+      "top": 440,
+      "left": 300,
+      "attrs": {
+        "color": "red"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "wredres",
+      "top": 480,
+      "left": 305,
+      "attrs": {
+        "value": "220"
+      }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "wyellow",
+      "top": 440,
+      "left": 360,
+      "attrs": {
+        "color": "yellow"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "wyellowres",
+      "top": 480,
+      "left": 365,
+      "attrs": {
+        "value": "220"
+      }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "wgreen",
+      "top": 440,
+      "left": 420,
+      "attrs": {
+        "color": "green"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "wgreenres",
+      "top": 480,
+      "left": 425,
+      "attrs": {
+        "value": "220"
+      }
+    }
+  ],
+  "connections": [
+    [
+      "lcd:GND",
+      "mega:GND.1",
+      "black",
+      []
+    ],
+    [
+      "lcd:VCC",
+      "mega:5V",
+      "red",
+      []
+    ],
+    [
+      "lcd:SDA",
+      "mega:20",
+      "green",
+      []
+    ],
+    [
+      "lcd:SCL",
+      "mega:21",
+      "blue",
+      []
+    ],
+    [
+      "usN:VCC",
+      "mega:5V",
+      "red",
+      []
+    ],
+    [
+      "usN:GND",
+      "mega:GND.2",
+      "black",
+      []
+    ],
+    [
+      "usN:TRIG",
+      "mega:34",
+      "green",
+      []
+    ],
+    [
+      "usN:ECHO",
+      "mega:35",
+      "blue",
+      []
+    ],
+    [
+      "usS:VCC",
+      "mega:5V",
+      "red",
+      []
+    ],
+    [
+      "usS:GND",
+      "mega:GND.2",
+      "black",
+      []
+    ],
+    [
+      "usS:TRIG",
+      "mega:36",
+      "green",
+      []
+    ],
+    [
+      "usS:ECHO",
+      "mega:37",
+      "blue",
+      []
+    ],
+    [
+      "usE:VCC",
+      "mega:5V",
+      "red",
+      []
+    ],
+    [
+      "usE:GND",
+      "mega:GND.2",
+      "black",
+      []
+    ],
+    [
+      "usE:TRIG",
+      "mega:38",
+      "green",
+      []
+    ],
+    [
+      "usE:ECHO",
+      "mega:39",
+      "blue",
+      []
+    ],
+    [
+      "usW:VCC",
+      "mega:5V",
+      "red",
+      []
+    ],
+    [
+      "usW:GND",
+      "mega:GND.2",
+      "black",
+      []
+    ],
+    [
+      "usW:TRIG",
+      "mega:40",
+      "green",
+      []
+    ],
+    [
+      "usW:ECHO",
+      "mega:41",
+      "blue",
+      []
+    ],
+    [
+      "nred:A",
+      "nredres:1",
+      "green",
+      []
+    ],
+    [
+      "nredres:2",
+      "mega:22",
+      "green",
+      []
+    ],
+    [
+      "nred:K",
+      "mega:GND.3",
+      "black",
+      []
+    ],
+    [
+      "nyellow:A",
+      "nyellowres:1",
+      "green",
+      []
+    ],
+    [
+      "nyellowres:2",
+      "mega:23",
+      "green",
+      []
+    ],
+    [
+      "nyellow:K",
+      "mega:GND.3",
+      "black",
+      []
+    ],
+    [
+      "ngreen:A",
+      "ngreenres:1",
+      "green",
+      []
+    ],
+    [
+      "ngreenres:2",
+      "mega:24",
+      "green",
+      []
+    ],
+    [
+      "ngreen:K",
+      "mega:GND.3",
+      "black",
+      []
+    ],
+    [
+      "sred:A",
+      "sredres:1",
+      "green",
+      []
+    ],
+    [
+      "sredres:2",
+      "mega:25",
+      "green",
+      []
+    ],
+    [
+      "sred:K",
+      "mega:GND.3",
+      "black",
+      []
+    ],
+    [
+      "syellow:A",
+      "syellowres:1",
+      "green",
+      []
+    ],
+    [
+      "syellowres:2",
+      "mega:26",
+      "green",
+      []
+    ],
+    [
+      "syellow:K",
+      "mega:GND.3",
+      "black",
+      []
+    ],
+    [
+      "sgreen:A",
+      "sgreenres:1",
+      "green",
+      []
+    ],
+    [
+      "sgreenres:2",
+      "mega:27",
+      "green",
+      []
+    ],
+    [
+      "sgreen:K",
+      "mega:GND.3",
+      "black",
+      []
+    ],
+    [
+      "ered:A",
+      "eredres:1",
+      "green",
+      []
+    ],
+    [
+      "eredres:2",
+      "mega:28",
+      "green",
+      []
+    ],
+    [
+      "ered:K",
+      "mega:GND.3",
+      "black",
+      []
+    ],
+    [
+      "eyellow:A",
+      "eyellowres:1",
+      "green",
+      []
+    ],
+    [
+      "eyellowres:2",
+      "mega:29",
+      "green",
+      []
+    ],
+    [
+      "eyellow:K",
+      "mega:GND.3",
+      "black",
+      []
+    ],
+    [
+      "egreen:A",
+      "egreenres:1",
+      "green",
+      []
+    ],
+    [
+      "egreenres:2",
+      "mega:30",
+      "green",
+      []
+    ],
+    [
+      "egreen:K",
+      "mega:GND.3",
+      "black",
+      []
+    ],
+    [
+      "wred:A",
+      "wredres:1",
+      "green",
+      []
+    ],
+    [
+      "wredres:2",
+      "mega:31",
+      "green",
+      []
+    ],
+    [
+      "wred:K",
+      "mega:GND.3",
+      "black",
+      []
+    ],
+    [
+      "wyellow:A",
+      "wyellowres:1",
+      "green",
+      []
+    ],
+    [
+      "wyellowres:2",
+      "mega:32",
+      "green",
+      []
+    ],
+    [
+      "wyellow:K",
+      "mega:GND.3",
+      "black",
+      []
+    ],
+    [
+      "wgreen:A",
+      "wgreenres:1",
+      "green",
+      []
+    ],
+    [
+      "wgreenres:2",
+      "mega:33",
+      "green",
+      []
+    ],
+    [
+      "wgreen:K",
+      "mega:GND.3",
+      "black",
+      []
+    ]
+  ],
+  "serialMonitor": {
+    "display": "always",
+    "newline": "lf",
+    "convertEol": true
+  }
+}

@@ -44,6 +44,7 @@ export interface Vehicle {
   totalTravelTime: number;
   distanceTraveled: number;
   laneIndex: number;
+  vehicleType?: 'sedan' | 'cab' | 'truck' | 'hatchback';
   emergencyWaypoints?: EmergencyWaypoint[];
   currentWaypointIndex?: number;
   lateralOffset?: number; // px shift towards curb when yielding to emergency vehicle

@@ -71,9 +71,13 @@ $$\text{All-Red Clearance} = 1.5\text{s} + \Delta_{\text{all\_red}}$$
 ```
 DEAM CP/
 ├── AETMS_DEAM_Presentation.pptx    # Slide presentation (VIT Pune collegiate format)
+├── DEAM_Presentation2.pptx         # Backup / alternate presentation deck
 ├── generate_deck.py                # Automation script generating PPTX deck
 ├── circuit_simulation_tinkercad.png # Tinkercad hardware simulation screenshot
 ├── web_simulation_dashboard.png     # DEAM 2x2 grid web simulator screenshot
+├── firmware/
+│   ├── sketch.ino                   # ATmega2560 Arduino Mega C++ firmware
+│   └── diagram.json                 # Wokwi / Tinkercad circuit wiring schema
 ├── src/
 │   ├── types/
 │   │   └── traffic.ts               # TypeScript interfaces & types

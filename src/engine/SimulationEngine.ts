@@ -308,18 +308,47 @@ export class SimulationEngine {
     dir: Approach;
     route: string[];
   }): void {
-    const colors = ['#38bdf8', '#818cf8', '#a78bfa', '#f472b6', '#34d399', '#fbbf24'];
-    const color = colors[Math.floor(Math.random() * colors.length)];
+    const roll = Math.random();
+    let type: 'sedan' | 'cab' | 'truck' | 'hatchback' = 'sedan';
+    let length = 18;
+    let width = 10;
+    let color = '#38bdf8';
+
+    if (roll < 0.15) {
+      type = 'truck';
+      length = 24;
+      width = 11;
+      const truckColors = ['#f59e0b', '#0284c7', '#475569', '#ea580c'];
+      color = truckColors[Math.floor(Math.random() * truckColors.length)];
+    } else if (roll < 0.35) {
+      type = 'cab';
+      length = 18;
+      width = 10;
+      color = '#eab308'; // Classic taxi yellow
+    } else if (roll < 0.65) {
+      type = 'sedan';
+      length = 18;
+      width = 10;
+      const sedanColors = ['#38bdf8', '#818cf8', '#34d399', '#38bdf8', '#60a5fa'];
+      color = sedanColors[Math.floor(Math.random() * sedanColors.length)];
+    } else {
+      type = 'hatchback';
+      length = 16;
+      width = 9.5;
+      const hatchColors = ['#f472b6', '#a78bfa', '#fb7185', '#2dd4bf'];
+      color = hatchColors[Math.floor(Math.random() * hatchColors.length)];
+    }
 
     const vehicle: Vehicle = {
       id: `V_${this.vehicleIdCounter++}`,
       x: entry.x,
       y: entry.y,
       speed: 1.2,
-      maxSpeed: 2.2 + Math.random() * 0.6,
-      length: 18,
-      width: 10,
+      maxSpeed: type === 'truck' ? 1.9 : 2.2 + Math.random() * 0.6,
+      length,
+      width,
       color,
+      vehicleType: type,
       isEmergency: false,
       route: entry.route,
       currentRouteIndex: 0,
@@ -336,6 +365,31 @@ export class SimulationEngine {
     };
 
     this.vehicles.push(vehicle);
+  }
+
+  public spawnRandomVehicle(): boolean {
+    const entryPoints = [
+      { origin: 'NORTH' as Approach, targetId: 'I1', x: 250 - 18, y: -20, dir: 'NORTH' as Approach, route: ['I1', 'I3'] },
+      { origin: 'NORTH' as Approach, targetId: 'I2', x: 550 - 18, y: -20, dir: 'NORTH' as Approach, route: ['I2', 'I4'] },
+      { origin: 'SOUTH' as Approach, targetId: 'I3', x: 250 + 18, y: this.CANVAS_HEIGHT + 20, dir: 'SOUTH' as Approach, route: ['I3', 'I1'] },
+      { origin: 'SOUTH' as Approach, targetId: 'I4', x: 550 + 18, y: this.CANVAS_HEIGHT + 20, dir: 'SOUTH' as Approach, route: ['I4', 'I2'] },
+      { origin: 'WEST' as Approach, targetId: 'I1', x: -20, y: 190 + 18, dir: 'WEST' as Approach, route: ['I1', 'I2'] },
+      { origin: 'WEST' as Approach, targetId: 'I3', x: -20, y: 430 + 18, dir: 'WEST' as Approach, route: ['I3', 'I4'] },
+      { origin: 'EAST' as Approach, targetId: 'I2', x: this.CANVAS_WIDTH + 20, y: 190 - 18, dir: 'EAST' as Approach, route: ['I2', 'I1'] },
+      { origin: 'EAST' as Approach, targetId: 'I4', x: this.CANVAS_WIDTH + 20, y: 430 - 18, dir: 'EAST' as Approach, route: ['I4', 'I3'] },
+    ];
+
+    const shuffled = [...entryPoints].sort(() => Math.random() - 0.5);
+    for (const entry of shuffled) {
+      const isBlocked = this.vehicles.some(
+        (v) => Math.hypot(v.x - entry.x, v.y - entry.y) < 45
+      );
+      if (!isBlocked && this.vehicles.length < 75) {
+        this.spawnNormalVehicle(entry);
+        return true;
+      }
+    }
+    return false;
   }
 
   private updateVehicles(dt: number): void {

@@ -65,11 +65,40 @@ export const VivaExplainerModal: React.FC<Props> = ({ isOpen, onClose }) => {
             </p>
           </div>
 
-          {/* Section 2: Mathematical Algorithms */}
+          {/* Section 2: Hardware Prototype (Arduino Mega & DEAM Interfacing) */}
+          <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-4">
+            <h3 className="text-sm font-semibold text-emerald-400 flex items-center gap-2 mb-2">
+              <Cpu className="w-4 h-4" />
+              2. Microprocessor & Hardware Implementation (DEAM Focus)
+            </h3>
+            <p className="text-slate-300 mb-2">
+              The physical prototype is implemented and validated in Tinkercad / Wokwi with the following hardware specifications:
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono text-slate-300 my-2">
+              <div className="bg-slate-900 border border-slate-800 p-2.5 rounded-lg">
+                <span className="text-sky-400 font-bold block mb-1">Microcontroller:</span>
+                Arduino MEGA 2560 (ATmega2560 @ 16 MHz, 54 digital I/O pins, 6 external interrupts).
+              </div>
+              <div className="bg-slate-900 border border-slate-800 p-2.5 rounded-lg">
+                <span className="text-sky-400 font-bold block mb-1">Ultrasonic Sensors:</span>
+                4× HC-SR04 on Pins 34-41 (10µs trigger pulse, Echo time / 58 = Distance in cm).
+              </div>
+              <div className="bg-slate-900 border border-slate-800 p-2.5 rounded-lg">
+                <span className="text-sky-400 font-bold block mb-1">Display & Bus:</span>
+                16×2 Character LCD via I2C backpack (PCF8574 @ 0x27) on SDA (Pin 20) / SCL (Pin 21).
+              </div>
+              <div className="bg-slate-900 border border-slate-800 p-2.5 rounded-lg">
+                <span className="text-sky-400 font-bold block mb-1">Priority Interrupt:</span>
+                External Interrupt line (INT0 / Pin 2) triggers instant sub-microsecond preemption ISR.
+              </div>
+            </div>
+          </div>
+
+          {/* Section 3: Mathematical Algorithms */}
           <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-4">
             <h3 className="text-sm font-semibold text-cyan-400 flex items-center gap-2 mb-2">
               <Code2 className="w-4 h-4" />
-              2. Adaptive Signal Timing Algorithm (Webster's Approximation)
+              3. Adaptive Signal Timing Algorithm (Webster's Approximation)
             </h3>
             <p className="mb-2">
               Each intersection continuously calculates approach queue pressure:
@@ -85,11 +114,11 @@ export const VivaExplainerModal: React.FC<Props> = ({ isOpen, onClose }) => {
             </p>
           </div>
 
-          {/* Section 3: Multi-Intersection Coordination */}
+          {/* Section 4: Multi-Intersection Coordination */}
           <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-4">
             <h3 className="text-sm font-semibold text-indigo-400 flex items-center gap-2 mb-2">
               <Radio className="w-4 h-4" />
-              3. Multi-Intersection Green Wave Coordination
+              4. Multi-Intersection Green Wave Coordination
             </h3>
             <p>
               When a platoon of vehicles clears an upstream intersection (e.g. I1 &rarr; I2), the controller transmits an inter-agent message with estimated time of arrival (ETA). The downstream controller incorporates this incoming wave into its next cycle calculation to create a green wave corridor.
